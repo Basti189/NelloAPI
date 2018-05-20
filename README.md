@@ -9,10 +9,6 @@ https://nellopublicapi.docs.apiary.io/#reference
 
 
 ```Java
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import de.wolfsline.nello.api.Location;
 import de.wolfsline.nello.api.NelloAPI;
 
