@@ -52,7 +52,7 @@ public class NelloAPI {
 		in.close();
 		
 		int responseCode = con.getResponseCode();
-		log("\nSending 'POST' request to URL : " + url, NelloAPI.INFO);
+		log("Sending 'POST' request to URL : " + url, NelloAPI.INFO);
 		log("Post parameters : " + urlParameters, NelloAPI.INFO);
 		log("Response Code : " + responseCode, NelloAPI.INFO);
 		log("Response: " + response, NelloAPI.INFO);
@@ -76,7 +76,7 @@ public class NelloAPI {
 		
 		int responseCode = con.getResponseCode();
 		
-		log("\nSending 'GET' request to URL : " + url, NelloAPI.INFO);
+		log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
 		log("Response Code : " + responseCode, NelloAPI.INFO);
 		
 
@@ -126,7 +126,7 @@ public class NelloAPI {
 		con.setRequestMethod("PUT");
 		
 		int responseCode = con.getResponseCode();
-		log("\nSending 'PUT' request to URL : " + url, NelloAPI.INFO);
+		log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
 		log("Response Code : " + responseCode, NelloAPI.INFO);
 
 		if (responseCode == 200) {
@@ -177,7 +177,7 @@ public class NelloAPI {
 		wr.close();
 		
 		int responseCode = con.getResponseCode();
-		log("\nSending 'PUT' request to URL : " + url, NelloAPI.INFO);
+		log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
 		log("Request: " + request, NelloAPI.INFO);
 		log("Response Code : " + responseCode, NelloAPI.INFO);
 
@@ -198,7 +198,7 @@ public class NelloAPI {
 		con.connect();
 		
 		int responseCode = con.getResponseCode();
-		log("\nSending 'GET' request to URL : " + url, NelloAPI.INFO);
+		log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
 		log("Response Code : " + responseCode, NelloAPI.INFO);
 		
 		if (responseCode == 200) {
@@ -218,4 +218,5 @@ public class NelloAPI {
 			}
 		}
 	}
+	
 }
