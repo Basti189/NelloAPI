@@ -12,12 +12,33 @@ https://nellopublicapi.docs.apiary.io/#reference
 import de.wolfsline.nello.api.Location;
 import de.wolfsline.nello.api.NelloAPI;
 
-NelloAPI api = new NelloAPI();
-String token = api.requestTokenClientCredentials("<YOUR CLIENT ID>", "<YOUR CLIENT SECRET>");
-List<Location> locations = api.getLocations(token);
-if (locations != null) {
-  api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>");
-  api.deleteWebhook(token, locations.get(0));
-  api.openDoor(token, locations.get(0));
+private NelloAPI api = new NelloAPI();
+private String token = "";
+private List<Location> locations;
+
+public void startApplication() {
+  api.setDebugOutput(true);
+  
+  token = api.requestTokenClientCredentials("<YOUR CLIENT ID>", "<YOUR CLIENT SECRET>");
+  locations = api.getLocations(token);
+  if (locations != null) {
+    api.register(this);
+		api.startServer(<YOUR PORT>);
+    api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>");
+    
+    api.openDoor(token, locations.get(0));
+  }
 }
+
+public void closeApplication() {
+  api.deleteWebhook(token, locations.get(0));
+  api.stopServer();
+}
+
+@NelloEvent
+public void onNelloActionEvent(NelloActionEvent event) {
+  System.out.println(event.toString); //or whatever
+}
+
+
 ```
