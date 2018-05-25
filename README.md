@@ -37,7 +37,7 @@ public void closeApplication() {
 
 @NelloEvent
 public void onNelloActionEvent(NelloActionEvent event) {
-  System.out.println(event.toString); //or whatever
+  System.out.println(event.toString()); //or whatever
 }
 
 
