@@ -34,6 +34,10 @@ public class NelloAPI {
 		mHttpCallbackServer.setDebugOutput(debug);
 	}
 	
+	public String getVersion() {
+		return "0.9.5-RC1";
+	}
+	
 	public void register(Object listener) {
 		mHttpCallbackServer.register(listener);
 	}
