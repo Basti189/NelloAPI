@@ -23,7 +23,7 @@ public void startApplication() {
   locations = api.getLocations(token);
   if (locations != null) {
     api.register(this);
-		api.startServer(<YOUR PORT>);
+    api.startServer(<YOUR PORT>);
     api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>");
     
     api.openDoor(token, locations.get(0));
