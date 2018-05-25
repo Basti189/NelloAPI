@@ -19,6 +19,7 @@ private List<Location> locations;
 public void startApplication() {
   api.setDebugOutput(true);
   
+  //Call this to get a token and store the token
   token = api.requestTokenClientCredentials("<YOUR CLIENT ID>", "<YOUR CLIENT SECRET>");
   locations = api.getLocations(token);
   if (locations != null) {
