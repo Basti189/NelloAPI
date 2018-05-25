@@ -80,14 +80,12 @@ public class HttpCallbackServer {
 	        os.write("".getBytes());
 	        os.close();
 	        
-	        JSONParser parser = new JSONParser();
-	        JSONObject response;
-			try {
-				response = (JSONObject) parser.parse(body);
-				distributeData(new NelloActionEvent(response));
-			} catch (ParseException e) {
-				log(" Can't parse JSON to NelloActionEvent", NelloAPI.ERROR);
-			}
+	        try {
+			JSONParser parser = new JSONParser();
+			JSONObject response = (JSONObject) parser.parse(body);
+			distributeData(new NelloActionEvent(response));
+		} catch (ParseException e) {
+			log(" Can't parse JSON to NelloActionEvent", NelloAPI.ERROR);
 		}
 	};
 	
