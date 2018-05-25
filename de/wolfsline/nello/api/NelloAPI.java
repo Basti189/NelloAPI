@@ -13,12 +13,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import de.wolfsline.nello.api.http.HttpCallbackServer;
+
 public class NelloAPI {
 	
-	private final static int INFO = 0;
-	private final static int ERROR = 1;
+	public final static int INFO = 0;
+	public final static int ERROR = 1;
 
 	private boolean mDebugOutput = false;
+	
+	private HttpCallbackServer mHttpCallbackServer = new HttpCallbackServer();
 	
 	public NelloAPI () {
 		
@@ -26,6 +30,23 @@ public class NelloAPI {
 	
 	public void setDebugOutput(boolean debug) {
 		mDebugOutput = debug;
+		mHttpCallbackServer.setDebugOutput(debug);
+	}
+	
+	public void register(Object listener) {
+		mHttpCallbackServer.register(listener);
+	}
+	
+	public void unregister(Object listener) {
+		mHttpCallbackServer.unregister(listener);
+	}
+	
+	public void startServer(int port) {
+		mHttpCallbackServer.start(port);
+	}
+	
+	public void stopServer() {
+		mHttpCallbackServer.stop();
 	}
 	
 	public String requestTokenClientCredentials(String client_id, String client_secret) throws Exception {
