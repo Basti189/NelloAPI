@@ -26,7 +26,7 @@ public class NelloAPI extends NelloBase {
 	}
 	
 	public String getVersion() {
-		return "0.9.6";
+		return "0.9.7";
 	}
 	
 	public void startServer(int port) {
