@@ -273,6 +273,7 @@ public class NelloAPI {
 	
 	private void log(String msg, int code) {
 		if (mDebugOutput) {
+			msg = "[NelloAPI] " + msg;
 			if (code == NelloAPI.INFO) {
 				System.out.println(msg);
 			} else if (code == NelloAPI.ERROR) {
