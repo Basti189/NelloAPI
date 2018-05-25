@@ -80,12 +80,13 @@ public class HttpCallbackServer {
 	        os.write("".getBytes());
 	        os.close();
 	        
-	        try {
-			JSONParser parser = new JSONParser();
-			JSONObject response = (JSONObject) parser.parse(body);
-			distributeData(new NelloActionEvent(response));
-		} catch (ParseException e) {
-			log(" Can't parse JSON to NelloActionEvent", NelloAPI.ERROR);
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject response = (JSONObject) parser.parse(body);
+				distributeData(new NelloActionEvent(response));
+			} catch (ParseException e) {
+				log(" Can't parse JSON to NelloActionEvent", NelloAPI.ERROR);
+			}
 		}
 	};
 	
@@ -106,6 +107,7 @@ public class HttpCallbackServer {
 	
 	private void log(String msg, int code) {
 		if (mDebugOutput) {
+			msg = "[NelloAPI] " + msg;
 			if (code == NelloAPI.INFO) {
 				System.out.println(msg);
 			} else if (code == NelloAPI.ERROR) {
