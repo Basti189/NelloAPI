@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,46 +15,44 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import de.wolfsline.nello.api.NelloAPI;
+import de.wolfsline.nello.api.NelloBase;
 import de.wolfsline.nello.api.events.NelloActionEvent;
 import de.wolfsline.nello.api.interfaces.NelloEvent;
 
-public class HttpCallbackServer {
-
+public class HttpCallbackServer extends NelloBase {
+	
 	private HttpServer mHttpServer;
-	private boolean mDebugOutput = false;
-	private List<Object> mRegisteredListener = new ArrayList<Object>();
 	
 	public HttpCallbackServer() {
 		
 	}
 	
-	public void setDebugOutput(boolean debug) {
-		mDebugOutput = debug;
-	}
-	
-	public void register(Object listener) {
-		mRegisteredListener.add(listener);
-	}
-	
-	public void unregister(Object listener) {
-		mRegisteredListener.remove(listener);
-	}
-	
 	public void start(int port)  {
 		if (mHttpServer == null) {
-			log("Starting webserver at ::" + port + "/", NelloAPI.INFO);
+			log("Starting webserver at ::" + port + "/", INFO);
 			try {
 				InetSocketAddress adress = new InetSocketAddress(port);
 				mHttpServer = HttpServer.create(adress, 0);
 				mHttpServer.createContext("/", handler);
 				mHttpServer.start();
-				log("Webserver started successfully ", NelloAPI.INFO);
+				log("Webserver started successfully ", INFO);
 			} catch (Exception e) {
 				mHttpServer = null;
-				log("Webserver failed to start ", NelloAPI.ERROR);
+				log("Webserver failed to start ", ERROR);
 			}
 		}
+	}
+	
+	public void trigger() {
+		try {
+			String testJSON = "{\"data\": {\"name\": \"Max Mustermann\", \"location_id\": \"095c56a8-6056-11e8-9c2d-fa7ae01bbebc\", \"user_id\": \"33561bd8-6056-11e8-9c2d-fa7ae01bbebc\"}, \"action\": \"swipe\"}";
+			JSONParser parser = new JSONParser();
+			JSONObject response = (JSONObject) parser.parse(testJSON);
+			distributeData(new NelloActionEvent(response));
+		} catch (ParseException e) {
+			log(" Can't parse JSON to NelloActionEvent", ERROR);
+		}
+		
 	}
 	
 	public void stop() {
@@ -73,7 +69,7 @@ public class HttpCallbackServer {
 			InputStreamReader isr = new InputStreamReader(httpExchange.getRequestBody(),"utf-8");
 			BufferedReader br = new BufferedReader(isr);
 			String body = br.readLine();
-			log("Requested body: " + body, NelloAPI.INFO);
+			log("Requested body: " + body, INFO);
 			
 	        httpExchange.sendResponseHeaders(200, "".length());
 	        OutputStream os = httpExchange.getResponseBody();
@@ -85,7 +81,7 @@ public class HttpCallbackServer {
 				JSONObject response = (JSONObject) parser.parse(body);
 				distributeData(new NelloActionEvent(response));
 			} catch (ParseException e) {
-				log(" Can't parse JSON to NelloActionEvent", NelloAPI.ERROR);
+				log(" Can't parse JSON to NelloActionEvent", ERROR);
 			}
 		}
 	};
@@ -98,22 +94,10 @@ public class HttpCallbackServer {
 					try {
 						method.invoke(listener, event);
 					} catch (Exception e) {
-						log("Wrong number of arguments -> " + method.getName(), NelloAPI.ERROR);
+						log("Wrong number of arguments -> " + method.getName(), ERROR);
 					}
 				}
 			}
 		}
 	}
-	
-	private void log(String msg, int code) {
-		if (mDebugOutput) {
-			msg = "[NelloAPI] " + msg;
-			if (code == NelloAPI.INFO) {
-				System.out.println(msg);
-			} else if (code == NelloAPI.ERROR) {
-				System.err.println(msg);
-			}
-		}
-	}
-	
 }
