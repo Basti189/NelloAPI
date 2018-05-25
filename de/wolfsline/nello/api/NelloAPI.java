@@ -148,8 +148,31 @@ public class NelloAPI extends NelloBase {
 	//Create new TimeWindow
 	//TODO
 	
-	//Delete a Time Window
-	//TODO
+	public boolean deleteTimeWindow(String token, Location location, int tw_id) {
+		int responseCode = -1;
+		try {
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/tw/" + tw_id;
+			log("Sending 'DELETE' request to URL : " + url, INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("DELETE");
+			con.connect();
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, INFO);
+		} catch (Exception e) {
+			
+		}
+		
+		if (responseCode == 200) {
+			log("Time window was deleted successfully", INFO);
+			return true;
+		}
+		log("The server could not verify that you are authorized to access the URL requested", ERROR);
+		return false;
+	}
 	
 	public boolean openDoor(String token, Location location) {
 		int responseCode = -1;
