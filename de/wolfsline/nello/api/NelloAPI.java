@@ -249,7 +249,7 @@ public class NelloAPI {
 		int responseCode = -1;
 		try {
 			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
-			log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
+			log("Sending 'DELETE' request to URL : " + url, NelloAPI.INFO);
 			URL obj = new URL(url);
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 			con.setRequestProperty ("Authorization", "Bearer " + token);
