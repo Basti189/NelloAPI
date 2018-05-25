@@ -45,7 +45,7 @@ public class HttpCallbackServer {
 	
 	public void start(int port)  {
 		if (mHttpServer == null) {
-			log("Starting webserver at ::9090/", NelloAPI.INFO);
+			log("Starting webserver at ::" + port + "/", NelloAPI.INFO);
 			try {
 				InetSocketAddress adress = new InetSocketAddress(port);
 				mHttpServer = HttpServer.create(adress, 0);
