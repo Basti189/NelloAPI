@@ -12,6 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import de.wolfsline.nello.api.http.HttpCallbackServer;
 
@@ -49,73 +50,95 @@ public class NelloAPI {
 		mHttpCallbackServer.stop();
 	}
 	
-	public String requestTokenClientCredentials(String client_id, String client_secret) throws Exception {
-		String url = "https://auth.nello.io/oauth/token/";
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		con.setDoOutput(true);
-		con.setRequestMethod("POST");
-		con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-		String urlParameters = "grant_type=client_credentials&client_id=" + client_id + "&client_secret=" + client_secret;
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(urlParameters);
-		wr.flush();
-		wr.close();
-		
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String inputLine;
+	public String requestTokenClientCredentials(String client_id, String client_secret) {
+		int responseCode = -1;
 		StringBuffer response = new StringBuffer();
+		try {
+			String url = "https://auth.nello.io/oauth/token/";
+			log("Sending 'POST' request to URL : " + url, NelloAPI.INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setDoOutput(true);
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
+			String urlParameters = "grant_type=client_credentials&client_id=" + client_id + "&client_secret=" + client_secret;
+			log("Post parameters : " + urlParameters, NelloAPI.INFO);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			
+			responseCode = con.getResponseCode();
+
+			log("Response Code : " + responseCode, NelloAPI.INFO);
+			log("Response: " + response, NelloAPI.INFO);
+			
+		} catch (Exception e) {
+			
 		}
-		in.close();
-		
-		int responseCode = con.getResponseCode();
-		log("Sending 'POST' request to URL : " + url, NelloAPI.INFO);
-		log("Post parameters : " + urlParameters, NelloAPI.INFO);
-		log("Response Code : " + responseCode, NelloAPI.INFO);
-		log("Response: " + response, NelloAPI.INFO);
-		
+
 		if (responseCode == 200) {
-			JSONParser parser = new JSONParser();
-			JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
-			return jsonObject.get("access_token").toString();
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
+				return jsonObject.get("access_token").toString();
+			} catch (Exception e) {
+				
+			}
+			
 		}
 		log("invalid_request or invalid_client", NelloAPI.ERROR);
 		return null;
 	}
 	
-	public List<Location> getLocations(String token) throws Exception {
-		String url = "https://public-api.nello.io/v1/locations/";
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		con.setRequestProperty("Content-Type", "application/json");
-		con.setRequestProperty ("Authorization", "Bearer " + token);
-		con.setRequestMethod("GET");
-		
-		int responseCode = con.getResponseCode();
-		
-		log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
-		log("Response Code : " + responseCode, NelloAPI.INFO);
-		
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String inputLine;
+	public List<Location> getLocations(String token) {
+		int responseCode = -1;
 		StringBuffer response = new StringBuffer();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
+		try {
+			String url = "https://public-api.nello.io/v1/locations/";
+			log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("GET");
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, NelloAPI.INFO);
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+		} catch (Exception e) {
+			
 		}
-		in.close();
+		
 		
 		if (responseCode == 200) {
-			JSONParser parser = new JSONParser();
-			JSONObject responseObject = (JSONObject) parser.parse(response.toString());
-			JSONArray dataArray = (JSONArray) responseObject.get("data");
-			List<Location> listLocations = new ArrayList<Location>();
+			JSONArray dataArray = null;
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject responseObject = (JSONObject) parser.parse(response.toString());
+				dataArray = (JSONArray) responseObject.get("data");
+			} catch (ParseException e) {
+				
+			}
 			if (dataArray != null) {
+				List<Location> listLocations = new ArrayList<Location>();
 				for (int i = 0 ; i < dataArray.size() ; i++) {
 					Location location = new Location((JSONObject) dataArray.get(i));
 					listLocations.add(location);
@@ -129,7 +152,6 @@ public class NelloAPI {
 			log("The server could not verify that you are authorized to access the URL requested", NelloAPI.ERROR);
 		}
 		return null;
-		
 	}
 	
 	//Create new TimeWindow
@@ -138,18 +160,24 @@ public class NelloAPI {
 	//Delete a Time Window
 	//TODO
 	
-	public boolean openDoor(String token, Location location) throws Exception {
-		String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/open/";
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		con.setRequestProperty("Content-Type", "application/json");
-		con.setRequestProperty ("Authorization", "Bearer " + token);
-		con.setRequestMethod("PUT");
+	public boolean openDoor(String token, Location location) {
+		int responseCode = -1;
+		try {
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/open/";
+			log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("PUT");
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, NelloAPI.INFO);
+		} catch (Exception e) {
+			
+		}
 		
-		int responseCode = con.getResponseCode();
-		log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
-		log("Response Code : " + responseCode, NelloAPI.INFO);
-
 		if (responseCode == 200) {
 			log("Door has been opened successfully!", NelloAPI.INFO);
 			return true;
@@ -158,50 +186,57 @@ public class NelloAPI {
 		return false;
 	}
 
-	public boolean setWebhook(String token, Location location, String webhook_url) throws Exception {
+	public boolean setWebhook(String token, Location location, String webhook_url) {
 		return setWebhook(token, location, webhook_url, true, true, true, true);
 	}
 	
-	public boolean setWebhook(String token, Location location, String webhook_url, boolean swipe, boolean geo, boolean tw, boolean deny) throws Exception {
+	public boolean setWebhook(String token, Location location, String webhook_url, boolean swipe, boolean geo, boolean tw, boolean deny) {
 		if (!(swipe || geo || tw || deny)) {
 			log("All values = \"false\" is not allowed", NelloAPI.ERROR);
 			return false;
 		}
-		
-		String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		con.setDoOutput(true);
-		con.setRequestProperty("Content-Type", "application/json");
-		con.setRequestProperty ("Authorization", "Bearer " + token);
-		con.setRequestMethod("PUT");
-		
-		String request = "{\"url\":\"" + webhook_url + "\",\"actions\":[";
-		if (swipe) {
-			request += "\"swipe\",";
+		int responseCode = -1;
+		try {
+			
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
+			log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setDoOutput(true);
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("PUT");
+			
+			String request = "{\"url\":\"" + webhook_url + "\",\"actions\":[";
+			if (swipe) {
+				request += "\"swipe\",";
+			}
+			if (geo) {
+				request += "\"geo\",";
+			} 
+			if (tw) {
+				request += "\"tw\",";
+			}
+			if (deny) {
+				request += "\"deny\",";
+			}
+			request = request.substring(0, request.length()-1);
+			request += "]}";
+			
+			log("Request: " + request, NelloAPI.INFO);
+			
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(request);
+			wr.flush();
+			wr.close();
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, NelloAPI.INFO);
+		} catch (Exception e) {
+			
 		}
-		if (geo) {
-			request += "\"geo\",";
-		} 
-		if (tw) {
-			request += "\"tw\",";
-		}
-		if (deny) {
-			request += "\"deny\",";
-		}
-		request = request.substring(0, request.length()-1);
-		request += "]}";
 		
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(request);
-		wr.flush();
-		wr.close();
-		
-		int responseCode = con.getResponseCode();
-		log("Sending 'PUT' request to URL : " + url, NelloAPI.INFO);
-		log("Request: " + request, NelloAPI.INFO);
-		log("Response Code : " + responseCode, NelloAPI.INFO);
-
 		if (responseCode == 200) {
 			log("Webhook was modified successfully", NelloAPI.INFO);
 			return true;
@@ -210,17 +245,23 @@ public class NelloAPI {
 		return false;
 	}
 	
-	public boolean deleteWebhook(String token, Location location) throws Exception {
-		String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
-		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-		con.setRequestProperty ("Authorization", "Bearer " + token);
-		con.setRequestMethod("DELETE");
-		con.connect();
-		
-		int responseCode = con.getResponseCode();
-		log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
-		log("Response Code : " + responseCode, NelloAPI.INFO);
+	public boolean deleteWebhook(String token, Location location) {
+		int responseCode = -1;
+		try {
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
+			log("Sending 'GET' request to URL : " + url, NelloAPI.INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("DELETE");
+			con.connect();
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, NelloAPI.INFO);
+		} catch (Exception e) {
+			
+		}
 		
 		if (responseCode == 200) {
 			log("Webhook was deleted successfully", NelloAPI.INFO);
