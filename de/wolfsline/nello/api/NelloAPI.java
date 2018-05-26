@@ -26,15 +26,15 @@ public class NelloAPI extends NelloBase {
 	}
 	
 	public String getVersion() {
-		return "0.9.7";
+		return "0.9.7.1-RC2";
 	}
 	
 	public void startServer(int port) {
 		mHttpCallbackServer.start(port);
 	}
 	
-	public void triggerServer() {
-		mHttpCallbackServer.trigger();
+	public void triggerNelloActionEvent(int actionID) {
+		mHttpCallbackServer.triggerNelloActionEvent(actionID);
 	}
 	
 	public void stopServer() {
