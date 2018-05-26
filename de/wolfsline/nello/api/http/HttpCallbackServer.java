@@ -43,16 +43,29 @@ public class HttpCallbackServer extends NelloBase {
 		}
 	}
 	
-	public void trigger() {
+	public void triggerNelloActionEvent(int actionID) {
 		try {
-			String testJSON = "{\"data\": {\"name\": \"Max Mustermann\", \"location_id\": \"095c56a8-6056-11e8-9c2d-fa7ae01bbebc\", \"user_id\": \"33561bd8-6056-11e8-9c2d-fa7ae01bbebc\"}, \"action\": \"swipe\"}";
+			String testJSON = "";
 			JSONParser parser = new JSONParser();
+			switch (actionID) {
+				case NelloActionEvent.SWIPE:
+					testJSON = "{\"data\": {\"name\": \"Adam Smith\", \"location_id\": \"095c56a8-6056-11e8-9c2d-fa7ae01bbebc\", \"user_id\": \"33561bd8-6056-11e8-9c2d-fa7ae01bbebc\"}, \"action\": \"swipe\"}";
+					break;
+				case NelloActionEvent.GEO:
+					testJSON = "{\"data\": {\"name\": \"Adam Smith\", \"location_id\": \"095c56a8-6056-11e8-9c2d-fa7ae01bbebc\", \"user_id\": \"33561bd8-6056-11e8-9c2d-fa7ae01bbebc\"}, \"action\": \"geo\"}";
+					break;
+				case NelloActionEvent.TW:
+					testJSON = "{\"data\":{\"name\":\"A sample TW\",\"location_id\":\"91c3e72e-2f1d-4bef-8290-9bee61c70b06\"},\"action\":\"tw\"}";
+					break;
+				case NelloActionEvent.DENY:
+					testJSON = "{\"data\":{\"location_id\":\"91c3e72e-2f1d-4bef-8290-9bee61c70b06\"},\"action\":\"deny\"}";
+					break;
+			}
 			JSONObject response = (JSONObject) parser.parse(testJSON);
 			distributeData(new NelloActionEvent(response));
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			log(" Can't parse JSON to NelloActionEvent", ERROR);
 		}
-		
 	}
 	
 	public void stop() {
