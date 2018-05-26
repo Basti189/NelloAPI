@@ -39,6 +39,21 @@ public void closeApplication() {
 @NelloEvent
 public void onNelloActionEvent(NelloActionEvent event) {
   System.out.println(event.toString()); //or whatever
+  String msg = "";
+		switch(event.getActionID()) {
+		case NelloActionEvent.SWIPE:
+			msg = event.getName() + " hat die Türe geöffnet";
+			break;
+		case NelloActionEvent.GEO:
+			msg = "Unknown geo message";
+			break;
+		case NelloActionEvent.TW:
+			msg = "Die Türe wurde durch \"" + event.getName() + "\" geöffnet";
+			break;
+		case NelloActionEvent.DENY:
+			msg = "Jemand hat geklingelt, aber nello hat nicht geöffnet";
+			break;
+		}
 }
 
 
