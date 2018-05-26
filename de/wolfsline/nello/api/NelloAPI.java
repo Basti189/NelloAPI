@@ -145,8 +145,59 @@ public class NelloAPI extends NelloBase {
 		return null;
 	}
 	
-	//Create new TimeWindow
-	//TODO
+	public int createNewTimeWindow(String token, Location location, String tw_name) {
+		int responseCode = -1;
+		StringBuffer response = new StringBuffer();
+		try {
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/tw/";
+			log("Sending 'POST' request to URL : " + url, INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/json");
+			con.connect();
+			
+			String request = "{\"name\":\"" + tw_name + "\","; //TODO iCal
+			
+			log("Request: " + request, INFO);
+			
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(request);
+			wr.flush();
+			wr.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, INFO);
+			log("Response: " + response, INFO);
+			
+			
+		} catch (Exception e) {
+			
+		}
+		if (responseCode == 201) { //Why 201 ?!
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
+				String strID = ((JSONObject) jsonObject.get("data")).get("id").toString();
+				int id = Integer.valueOf(strID);
+				log("Time window was created successfully", INFO);
+				return id;
+			} catch (Exception e) {
+				
+			}
+		}
+		log("An error has occurred or the server could not verify that you are authorized to access the URL requested", ERROR);
+		return -1;
+	}
 	
 	public boolean deleteTimeWindow(String token, Location location, int tw_id) {
 		int responseCode = -1;
