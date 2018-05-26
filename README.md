@@ -9,8 +9,10 @@ https://nellopublicapi.docs.apiary.io/#reference
 
 
 ```Java
-import de.wolfsline.nello.api.Location;
 import de.wolfsline.nello.api.NelloAPI;
+import de.wolfsline.nello.api.events.NelloActionEvent;
+import de.wolfsline.nello.api.interfaces.NelloEvent;
+import de.wolfsline.nello.api.location.Location;
 
 private NelloAPI api = new NelloAPI();
 private String token = "";
