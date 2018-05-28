@@ -144,7 +144,7 @@ public class NelloAPI extends NelloBase {
 		return null;
 	}
 	
-	public int createNewTimeWindow(String token, Location location, String tw_name) {
+	public String createNewTimeWindow(String token, Location location, String tw_name, String iCal) {
 		int responseCode = -1;
 		StringBuffer response = new StringBuffer();
 		try {
@@ -153,11 +153,13 @@ public class NelloAPI extends NelloBase {
 			URL obj = new URL(url);
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setDoOutput(true);
 			con.setRequestMethod("POST");
 			con.setRequestProperty("Content-Type", "application/json");
 			con.connect();
 			
-			String request = "{\"name\":\"" + tw_name + "\","; //TODO iCal
+			//TODO
+			String request = "{\"name\":\"" + tw_name + "\",\"ical\":\"" + iCal + "\"}"; 
 			
 			log("Request: " + request, INFO);
 			
@@ -180,14 +182,14 @@ public class NelloAPI extends NelloBase {
 			
 			
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
-		if (responseCode == 201) { //Why 201 ?!
+		if (responseCode == 201) {
 			try {
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
-				String strID = ((JSONObject) jsonObject.get("data")).get("id").toString();
-				int id = Integer.valueOf(strID);
+				System.out.println("\n" + jsonObject.toString() + "\n");
+				String id = ((JSONObject) jsonObject.get("data")).get("id").toString();
 				log("Time window was created successfully", INFO);
 				return id;
 			} catch (Exception e) {
@@ -195,14 +197,14 @@ public class NelloAPI extends NelloBase {
 			}
 		}
 		log("An error has occurred or the server could not verify that you are authorized to access the URL requested", ERROR);
-		return -1;
+		return null;
 	}
 	
 	
-	public boolean deleteTimeWindow(String token, Location location, int tw_id) {
+	public boolean deleteTimeWindow(String token, Location location, String tw_id) {
 		int responseCode = -1;
 		try {
-			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/tw/" + tw_id;
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/tw/" + tw_id + "/";
 			log("Sending 'DELETE' request to URL : " + url, INFO);
 			URL obj = new URL(url);
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -213,11 +215,12 @@ public class NelloAPI extends NelloBase {
 			responseCode = con.getResponseCode();
 			
 			log("Response Code : " + responseCode, INFO);
+			
 		} catch (Exception e) {
 			
 		}
 		
-		if (responseCode == 200) {
+		if (responseCode == 204) { //200?
 			log("Time window was deleted successfully", INFO);
 			return true;
 		}
@@ -265,7 +268,6 @@ public class NelloAPI extends NelloBase {
 		}
 		int responseCode = -1;
 		try {
-			
 			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/webhook/";
 			log("Sending 'PUT' request to URL : " + url, INFO);
 			URL obj = new URL(url);
