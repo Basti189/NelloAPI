@@ -182,13 +182,12 @@ public class NelloAPI extends NelloBase {
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(); //<- Remove, only for DEBUG
 		}
 		if (responseCode == 201) {
 			try {
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
-				System.out.println("\n" + jsonObject.toString() + "\n");
 				String id = ((JSONObject) jsonObject.get("data")).get("id").toString();
 				log("Time window was created successfully", INFO);
 				return id;
