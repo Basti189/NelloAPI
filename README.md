@@ -27,7 +27,10 @@ public void startApplication() {
   if (locations != null) {
     api.register(this);
     api.startServer(<YOUR PORT>);
+    //Register all actions
     api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>");
+    //Register specific actions
+    //api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>", NelloActionEvent.SWIPE, NelloActionEvent.Deny);
     
     api.openDoor(token, locations.get(0));
   }
