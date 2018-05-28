@@ -259,6 +259,9 @@ public class NelloAPI extends NelloBase {
 		if (nelloActionEvents.length == 0) {
 			log("One NelloActionEvent is required", ERROR);
 			return false;
+		} else if (nelloActionEvents.length > 4) {
+			log("More than 4 NelloActionEvents are not allowed", ERROR);
+			return false;
 		}
 		int responseCode = -1;
 		try {
