@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import de.wolfsline.nello.api.events.NelloActionEvent;
 import de.wolfsline.nello.api.http.HttpCallbackServer;
 import de.wolfsline.nello.api.location.Location;
 
@@ -26,7 +27,7 @@ public class NelloAPI extends NelloBase {
 	}
 	
 	public String getVersion() {
-		return "0.9.7.1-RC2";
+		return "0.9.7.2";
 	}
 	
 	public void startServer(int port) {
@@ -62,8 +63,6 @@ public class NelloAPI extends NelloBase {
 			
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String inputLine;
-			
-
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
@@ -199,6 +198,7 @@ public class NelloAPI extends NelloBase {
 		return -1;
 	}
 	
+	
 	public boolean deleteTimeWindow(String token, Location location, int tw_id) {
 		int responseCode = -1;
 		try {
@@ -250,14 +250,14 @@ public class NelloAPI extends NelloBase {
 		log("The server could not verify that you are authorized to access the URL requested", ERROR);
 		return false;
 	}
-
+	
 	public boolean setWebhook(String token, Location location, String webhook_url) {
-		return setWebhook(token, location, webhook_url, true, true, true, true);
+		return setWebhook(token, location, webhook_url, NelloActionEvent.SWIPE, NelloActionEvent.GEO, NelloActionEvent.TW, NelloActionEvent.DENY);
 	}
 	
-	public boolean setWebhook(String token, Location location, String webhook_url, boolean swipe, boolean geo, boolean tw, boolean deny) {
-		if (!(swipe || geo || tw || deny)) {
-			log("All values = \"false\" is not allowed", ERROR);
+	public boolean setWebhook(String token, Location location, String webhook_url, int... nelloActionEvents) {
+		if (nelloActionEvents.length == 0) {
+			log("One NelloActionEvent is required", ERROR);
 			return false;
 		}
 		int responseCode = -1;
@@ -273,17 +273,16 @@ public class NelloAPI extends NelloBase {
 			con.setRequestMethod("PUT");
 			
 			String request = "{\"url\":\"" + webhook_url + "\",\"actions\":[";
-			if (swipe) {
-				request += "\"swipe\",";
-			}
-			if (geo) {
-				request += "\"geo\",";
-			} 
-			if (tw) {
-				request += "\"tw\",";
-			}
-			if (deny) {
-				request += "\"deny\",";
+			for (int nelloActionEvent : nelloActionEvents) {
+				if (nelloActionEvent == NelloActionEvent.SWIPE) {
+					request += "\"swipe\",";
+				} else if (nelloActionEvent == NelloActionEvent.GEO) {
+					request += "\"geo\",";
+				} else if (nelloActionEvent == NelloActionEvent.TW) {
+					request += "\"tw\",";
+				} else if (nelloActionEvent == NelloActionEvent.DENY) {
+					request += "\"deny\",";
+				}
 			}
 			request = request.substring(0, request.length()-1);
 			request += "]}";
