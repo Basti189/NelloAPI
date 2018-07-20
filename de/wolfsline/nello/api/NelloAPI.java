@@ -1,8 +1,10 @@
 package de.wolfsline.nello.api;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import de.wolfsline.nello.api.events.NelloActionEvent;
 import de.wolfsline.nello.api.http.HttpCallbackServer;
 import de.wolfsline.nello.api.location.Location;
+import de.wolfsline.nello.api.timewindow.TimeWindow;
 
 public class NelloAPI extends NelloBase {
 	
@@ -144,7 +147,7 @@ public class NelloAPI extends NelloBase {
 		return null;
 	}
 	
-	public String createNewTimeWindow(String token, Location location, String tw_name, String iCal) {
+	public TimeWindow createNewTimeWindow(String token, Location location, String tw_name, String iCal) {
 		int responseCode = -1;
 		StringBuffer response = new StringBuffer();
 		try {
@@ -168,29 +171,27 @@ public class NelloAPI extends NelloBase {
 			wr.flush();
 			wr.close();
 			
+			responseCode = con.getResponseCode();
+			log("Response Code : " + responseCode, INFO);
+			
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String inputLine;
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
 			in.close();
-			
-			responseCode = con.getResponseCode();
-			
-			log("Response Code : " + responseCode, INFO);
 			log("Response: " + response, INFO);
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace(); //<- Remove, only for DEBUG
+			
 		}
 		if (responseCode == 201) {
 			try {
 				JSONParser parser = new JSONParser();
 				JSONObject jsonObject = (JSONObject) parser.parse(response.toString());
-				String id = ((JSONObject) jsonObject.get("data")).get("id").toString();
 				log("Time window was created successfully", INFO);
-				return id;
+				return new TimeWindow((JSONObject) jsonObject.get("data"));
 			} catch (Exception e) {
 				
 			}
@@ -199,6 +200,57 @@ public class NelloAPI extends NelloBase {
 		return null;
 	}
 	
+	public List<TimeWindow> listTimeWindows(String token, Location location) {
+		int responseCode = -1;
+		StringBuffer response = new StringBuffer();
+		try {
+			String url = "https://public-api.nello.io/v1/locations/" + location.getLocation_id() + "/tw/";
+			log("Sending 'GET' request to URL : " + url, INFO);
+			URL obj = new URL(url);
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty ("Authorization", "Bearer " + token);
+			con.setRequestMethod("GET");
+			
+			responseCode = con.getResponseCode();
+			
+			log("Response Code : " + responseCode, INFO);
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();			
+		} catch (Exception e) {
+			
+		}
+		
+		if (responseCode == 200) {
+			JSONArray dataArray = null;
+			try {
+				JSONParser parser = new JSONParser();
+				JSONObject responseObject = (JSONObject) parser.parse(response.toString());
+				dataArray = (JSONArray) responseObject.get("data");
+			} catch (ParseException e) {
+				
+			}
+			if (dataArray != null) {
+				List<TimeWindow> listTimeWindows = new ArrayList<TimeWindow>();
+				for (int i = 0 ; i < dataArray.size() ; i++) {
+					TimeWindow timeWindow = new TimeWindow((JSONObject) dataArray.get(i));
+					listTimeWindows.add(timeWindow);
+					log("[" + (i+1) + "] " + timeWindow.toString(), INFO);
+				}
+				return listTimeWindows;
+			} else {
+				log("No time windows available", ERROR);
+			}
+		} else {
+			log("The server could not verify that you are authorized to access the URL requested", ERROR);
+		}
+		return null;
+	}
 	
 	public boolean deleteTimeWindow(String token, Location location, String tw_id) {
 		int responseCode = -1;
@@ -219,7 +271,7 @@ public class NelloAPI extends NelloBase {
 			
 		}
 		
-		if (responseCode == 204) { //200?
+		if (responseCode == 200) {
 			log("Time window was deleted successfully", INFO);
 			return true;
 		}
