@@ -1,10 +1,8 @@
 package de.wolfsline.nello.api;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,7 @@ public class NelloAPI extends NelloBase {
 	}
 	
 	public String getVersion() {
-		return "0.9.7.2";
+		return "0.9.7.9";
 	}
 	
 	public void startServer(int port) {
