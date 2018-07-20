@@ -13,6 +13,7 @@ import de.wolfsline.nello.api.NelloAPI;
 import de.wolfsline.nello.api.events.NelloActionEvent;
 import de.wolfsline.nello.api.interfaces.NelloEvent;
 import de.wolfsline.nello.api.location.Location;
+import de.wolfsline.nello.api.timewindow.TimeWindow;
 
 private NelloAPI api = new NelloAPI();
 private String token = "";
@@ -31,6 +32,12 @@ public void startApplication() {
     api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>");
     //Register specific actions
     //api.setWebhook(token, locations.get(0), "<YOUR WEBHOOK URL>", NelloActionEvent.SWIPE, NelloActionEvent.Deny);
+    
+    //list available time windows
+    List<TimeWindow> listTimeWindows = nello.listTimeWindows(token, locations.get(0));
+    for (TimeWindow tw : listTimeWindows) {
+      nello.deleteTimeWindow(token, locations.get(0), tw.getId()); //or whatever
+    }
     
     api.openDoor(token, locations.get(0));
   }
